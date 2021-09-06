@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  bmc:
+    build: ./
+    image: atareao/bmc
+    container_name: bmc
+    restart: unless-stopped
+    ports:
+      - 5000:5000
+    volumes:
+      - ./database:/app/database
+    env_file:
+      - bmc.env
+
