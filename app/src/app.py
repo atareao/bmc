@@ -43,7 +43,7 @@ Log.set(os.environ['DEBUG'])
 
 @app.route('/status', methods=['GET'])
 def get_status():
-    return 'Up and running', 200
+    return make_response(jsonify({'status': 'Up and running'}), 200)
 
 
 @app.route('/bmc/webhook/<webhook>', methods=['POST'])
@@ -92,24 +92,27 @@ def bmc_webhook(webhook):
                         asupporter.set_thanks(False)
                     Log.info("New donation {}".format(user.name))
                     asupporter.save()
-                return 'Updated', 200
-    return 'KO', 404
+                return make_response(jsonify({'status': 'Updated'}), 200)
+    return make_response(jsonify({'status': 'error', 'msg': 'Not found'}), 404)
 
 
 @app.route('/discord/<webhook>', methods=['POST'])
 def discord_webhook(webhook):
     if os.environ['WEBHOOK'] != webhook:
-        return 'KO', 404
+        return make_response(jsonify({'status': 'error',
+                             'msg': 'Not found'}), 404)
     else:
         Log.info(request.headers)
         Log.info(request.data)
-    return 'Up and running', 200
+    return make_response(jsonify({'status': 'OK',
+                                  'msg': 'Up and running'}), 200)
 
 
 @app.route('/bmc/update/<webhook>', methods=['GET'])
 def bmc_update(webhook):
     if os.environ['WEBHOOK'] != webhook:
-        return 'KO', 404
+        return make_response(jsonify({'status': 'error',
+                             'msg': 'Not found'}), 404)
     else:
         bmc = BMC(os.environ["BMC_BASE_URI"],
                   os.environ["BMC_ACCESS_TOKEN"])
@@ -146,12 +149,12 @@ def bmc_update(webhook):
                 Log.error(exception)
             Log.info("New member {}".format(amember.NAME))
             amember.save()
-        return 'Updated', 200
+        return make_response(jsonify({'status': 'OK', 'msg': 'Updated'}), 200)
 
 
 @app.errorhandler(404)
 def not_found(error):
-    return make_response(jsonify({'error': 'Not found'}), 404)
+    return make_response(jsonify({'status': 'error', 'msg': 'Not found'}), 404)
 
 
 def init():

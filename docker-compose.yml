@@ -24,6 +24,8 @@ services:
       - ./templates:/app/templates
     env_file:
       - bmc_prod.env
+    ports:
+      - 5001:5000
     labels:
       - traefik.enable=true
       - traefik.http.services.bmc.loadbalancer.server.port=5000
