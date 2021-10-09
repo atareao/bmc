@@ -1,26 +1,24 @@
 #!/usr/bin/env python3
 
 import requests
-from member import Member
-from utils import Log
+from user import User
 
+BASE_URI = 'https://developers.buymeacoffee.com'
 
 class BMC:
-    def __init__(self, base_uri, token):
-        self._base_uri = base_uri
+    def __init__(self, token):
         self._token = token
 
     def get_active_members(self):
-        members = []
-        url = f"{self._base_uri}/api/v1/subscriptions?status=active&page=1"
-        Log.info(url)
+        users = []
+        url = f"{BASE_URI}/api/v1/subscriptions?status=active&page=1"
         while url is not None:
-            url, new_members = self._get_active_members(url)
-            members.extend(new_members)
-        return members
+            url, new_users = self._get_active_members(url)
+            users.extend(new_users)
+        return users
 
     def _get_active_members(self, url):
-        members = []
+        users = []
         headers = {"Authorization": f"Bearer {self._token}"}
         try:
             response = requests.get(url, headers=headers)
@@ -28,11 +26,12 @@ class BMC:
                 data = response.json()
                 url = data['next_page_url']
                 for item in data['data']:
-                    amember = Member(item['payer_name'], item['payer_email'])
-                    members.append(amember)
-                return url, members
+                    an_user = User.from_json(item)
+                    an_user.is_member = True
+                    users.append(an_user)
+                return url, users
         except Exception as exception:
-            Log.error(exception)
-        return None, members
+            print(exception)
+        return None, users
 
 

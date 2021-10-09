@@ -139,4 +139,3 @@ cython_debug/
 
 ENV.sh
 templates/*
-bmc_prod.env
