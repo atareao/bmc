@@ -41,6 +41,15 @@ class TestMember(unittest.TestCase):
         if os.path.exists(Member.DATABASE):
             os.remove(Member.DATABASE)
 
+    def test_print_member(self):
+        Log.info("=== test_print ===")
+        amember = Member("Lorenzo", "lorenzo.carbonell.cerezo@gmail.com")
+        Log.info(amember)
+        Log.info(amember.__dict__.keys())
+        for key in amember.__dict__.keys():
+            print(key)
+        self.assertNotEqual(amember, '')
+
     def test_create(self):
         Log.info("=== test_create ===")
         amember = Member("Lorenzo", "lorenzo.carbonell.cerezo@gmail.com")
