@@ -1,0 +1,6 @@
+flask
+itsdangerous
+requests
+pyinotify
+werkzeug
+markdown
