@@ -1,0 +1,197 @@
+#!/usr/bin/env python3
+
+import os
+import sqlite3
+from utils import Log, TRUE, FALSE
+
+
+class NoUnikeys(Exception):
+    def __init__(self):
+        message = 'No unique keys defined'
+        super().__init__(message)
+
+
+class Table:
+    DATABASE = '/app/database/database.db'
+    TABLE = 'TABLE'
+    PK = 'ID'
+    CREATE_TABLE_QUERY = ''
+    UNIKEYS = []
+    COLUMNS = []
+
+    def __init__(self):
+        for column in self.COLUMNS:
+            setattr(self, column, None)
+
+    @classmethod
+    def inicializate(cls):
+        cls.__execute(cls.CREATE_TABLE_QUERY)
+        cls.COLUMNS = cls.__get_columns()
+
+    @classmethod
+    def __execute(cls, sqlquery, data=None):
+        lastrowid = None
+        conn = None
+        try:
+            conn = sqlite3.connect(cls.DATABASE)
+            cursor = conn.cursor()
+            Log.info(sqlquery)
+            if data:
+                lastrowid = cursor.execute(sqlquery, data).lastrowid
+            else:
+                lastrowid = cursor.execute(sqlquery).lastrowid
+            conn.commit()
+        except Exception as exception:
+            Log.error(exception)
+            lastrowid = None
+        finally:
+            if conn:
+                conn.close()
+        return lastrowid
+
+    @classmethod
+    def __select(cls, sqlquery):
+        conn = None
+        try:
+            conn = sqlite3.connect(cls.DATABASE)
+            cursor = conn.cursor()
+            Log.info(sqlquery)
+            cursor.execute(sqlquery)
+            return cursor.fetchall()
+        except Exception as exception:
+            Log.error(exception)
+        finally:
+            if conn:
+                conn.close()
+        return None
+
+    @classmethod
+    def __get_columns(cls):
+        conn = None
+        sqlquery = f"SELECT * FROM {cls.TABLE} LIMIT 1"
+        try:
+            conn = sqlite3.connect(cls.DATABASE)
+            cursor = conn.cursor()
+            Log.info(sqlquery)
+            cursor.execute(sqlquery)
+            columns = [description[0] for description in cursor.description]
+            columns.sort()
+        except Exception as exception:
+            Log.error(exception)
+            columns = []
+        finally:
+            if conn:
+                conn.close()
+        return columns
+
+    def set(self, column, value):
+        setattr(self, column, value)
+
+    def get(self, column):
+        return getattr(self, column)
+
+    @classmethod
+    def from_dict(cls, adict):
+        item = cls()
+        columns = cls.COLUMNS.copy()
+        if cls.PK in columns:
+            columns.remove(cls.PK)
+        for column in columns:
+            if column in adict.keys():
+                setattr(item, column, adict[column])
+        return item
+
+    @classmethod
+    def from_list(cls, result):
+        item = cls()
+        columns = cls.COLUMNS.copy()
+        if len(result) == len(columns) - 1:
+            columns.remove(cls.PK)
+        for index, column in enumerate(columns):
+            setattr(item, column, result[index])
+        return item
+
+    def save(self):
+        keys = self.COLUMNS.copy()
+        if self.get(self.PK):
+            keys.remove(self.PK)
+            set_values = ",".join([f"{key}=?" for key in keys])
+            sqlquery = f"UPDATE {self.TABLE} SET {set_values} WHERE {self.PK}=?"
+            data = [self.get(key) for key in keys]
+            data.append(self.get(self.PK))
+            self.__execute(sqlquery, data)
+        else:
+            set_values = ",".join(keys)
+            set_data = ("?,"*len(keys))[:-1]
+            sqlquery = "INSERT INTO {} ({}) VALUES ({})".format(
+                    self.TABLE, set_values, set_data)
+            data = [self.get(key) for key in keys]
+            self.set(self.PK, self.__execute(sqlquery, data))
+
+    def exists(self):
+        if self.UNIKEYS:
+            condition = []
+            for key in self.UNIKEYS:
+                value = self.get(key)
+                condition.append(f"{key}='{value}'")
+            strcondition = ' and '.join(condition)
+            items = self.select(strcondition)
+            return len(items) > 0
+        raise NoUnikeys
+
+    @classmethod
+    def get_by_id(cls, id):
+        condition = f"{cls.PK}='{id}'"
+        items = cls.select(condition)
+        return items[0] if len(items) > 0 else None
+
+    @classmethod
+    def get_all(cls):
+        return cls.select()
+
+    @classmethod
+    def select(cls, condition=None):
+        columns = ','.join(cls.COLUMNS)
+        sqlquery = f"SELECT {columns} FROM {cls.TABLE}"
+        if condition:
+            sqlquery += f" WHERE {condition}"
+        items = []
+        result = cls.__select(sqlquery)
+        if result:
+            for item in result:
+                items.append(cls.from_list(item))
+        return items
+
+    @classmethod
+    def query(cls, sqlquery):
+        return cls.select(sqlquery)
+
+    def serialize(self):
+        result = {}
+        for column in self.COLUMNS:
+            result[column] = self.get(column)
+        return result
+
+    def __repr__(self):
+        name = type(self).__name__
+        id = self.get(self.PK)
+        return f'<{name} {id}>'
+
+    def __iter__(self):
+        for column in self.COLUMNS:
+            yield(column, self.get(column))
+
+    def __str__(self):
+        result = []
+        for column in self.COLUMNS:
+            value = self.get(column)
+            result.append(f"{column}: {value}")
+        return "\n".join(result)
+
+    def __eq__(self, other):
+        if self.UNIKEYS:
+            for key in self.UNIKEYS:
+                if getattr(self, key) != getattr(other, key):
+                    return False
+            return True
+        raise NoUnikeys
