@@ -5,24 +5,26 @@ import sys
 import os
 sys.path.append(os.path.join("../src"))
 from bmc import BMC
-from user import User
+from member import Member
+from utils import load_env
 
-BMC_TOKEN = os.getenv("BMC_ACCESS_TOKEN")
 
 class TestBMC(unittest.TestCase):
     def test_get_active_members(self):
-        print(BMC_TOKEN)
-        bmc_client = BMC(BMC_TOKEN)
-        users = bmc_client.get_active_members()
-        for user in users:
-            print(user)
-        self.assertGreater(len(users), 0, "Should be greater than 0")
+        bmc_client = BMC(os.getenv('BMC_BASE_URI'),
+                         os.getenv('BMC_ACCESS_TOKEN'))
+        members = bmc_client.get_active_members()
+        for member in members:
+            print(member)
+        self.assertGreater(len(members), 0, "Should be greater than 0")
 
     def test_user(self):
-        an_user = User(None, None)
+        amember = Member(None, None)
         print("---")
-        print(an_user)
+        print(amember)
 
 
 if __name__ == '__main__':
+    load_env(os.path.abspath("../../bmc.env"))
+    print("=== Start ===")
     unittest.main()
