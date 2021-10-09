@@ -5,6 +5,8 @@ MAINTAINER Lorenzo Carbonell <a.k.a. atareao> "lorenzo.carbonell.cerezo@gmail.co
 
 ENV PYTHONUNBUFFERED=1
 
+COPY requirements.txt /requirements.txt
+
 RUN echo "**** install Python ****" && \
     apk add --update --no-cache python3 tini tzdata && \
     if [ ! -e /usr/bin/python ]; then ln -sf python3 /usr/bin/python ; fi && \
@@ -15,7 +17,7 @@ RUN echo "**** install Python ****" && \
     pip3 install --no-cache --upgrade pip setuptools wheel && \
     if [ ! -e /usr/bin/pip ]; then ln -s pip3 /usr/bin/pip ; fi && \
     echo "**** install dependencies **** " && \
-    pip3 install --no-cache-dir -r /requirements.txt\
+    pip3 install --no-cache-dir -r /requirements.txt && \
     rm -rf /var/lib/apt/lists/* /requirements.txt && \
     echo "**** create user ****" && \
     addgroup dockeruser && \
