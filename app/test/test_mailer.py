@@ -25,21 +25,24 @@ import unittest
 import sys
 import os
 sys.path.append(os.path.join("../src"))
-from mailer import Mailer
+from mrapi import MailRelay
+from utils import Log, load_env
 
-MAIL = os.getenv("MAIL")
-PASSWORD = os.getenv("PASSWORD")
-SERVER = os.getenv("SERVER")
-PORT = os.getenv("PORT")
-TO = os.getenv("TO")
 
 class TestMailer(unittest.TestCase):
     def test_send_mail(self):
-        print(SERVER, PORT, MAIL)
-        amailer = Mailer(SERVER, PORT, MAIL, PASSWORD)
-        markdown = "**Hola mundo crule**"
-        amailer.send(TO, "Ejemplo", markdown)
+        mr = MailRelay(os.environ['BASE_URL'], os.environ['TOKEN'])
+        from_name = os.environ['DEFAULT_NAME']
+        from_mail = os.environ['DEFAULT_EMAIL']
+        to_name = os.environ['TEST_NAME']
+        to_mail = os.environ['TEST_EMAIL']
+        subject = "Este es de prueba"
+        markdown_content = "Hola mundo **cruel** en [aquí](https://atareao.es)"
+        mr.send_mail(from_name, from_mail, to_name, to_mail, subject,
+                markdown_content)
+        self.assertTrue(True)
 
 
 if __name__ == '__main__':
+    load_env("../../bmc_prod.env")
     unittest.main()
