@@ -37,7 +37,10 @@ from letterwriter import LetterWriter
 
 app = Flask(__name__)
 
-Table.DATABASE = '/app/database/caca.db'
+if os.environ['ENVIRONMENT'] == 'TEST':
+    Table.DATABASE = '/app/database/test.db'
+else:
+    Table.DATABASE = '/app/database/bmc.db'
 Log.set(os.environ['DEBUG'])
 
 
