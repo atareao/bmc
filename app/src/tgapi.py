@@ -25,15 +25,25 @@ import requests
 import json
 from utils import Log
 
+
 class Telegram:
     URL = 'https://api.telegram.org/bot{}'
 
     def __init__(self, token):
         self._token = token
 
+    def sen_message(self, chat_id, message, parse_mode="HTML"):
+        url = self.URL.format(self._token) + '/sendMessage'
+        data = {'chat_id': chat_id,
+                'text': message,
+                'parse_mode': parse_mode}
+        response = requests.post(url, data=data)
+        Log.info(f"Código de respuesta: {response.status_code}")
+        Log.info(f"Content: {response.text}")
+
     def send_poll(self, chat_id, aquestion):
         url = self.URL.format(self._token) + '/sendPoll'
-        data = {'chat_id': chat_id, 
+        data = {'chat_id': chat_id,
                 'question': aquestion.question,
                 'options': json.dumps(aquestion.options.split('|')),
                 'type': 'quiz',

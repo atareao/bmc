@@ -22,14 +22,13 @@
 # SOFTWARE.
 
 import os
-import time
 import hmac
 import hashlib
 from flask import Flask, jsonify, make_response, request
 from table import Table
 from member import Member
 from supporter import Supporter
-from utils import Log, TRUE, FALSE
+from utils import Log, TRUE
 from bmc import BMC
 from mrapi import MailRelay
 from letterwriter import LetterWriter
@@ -93,7 +92,7 @@ def bmc_webhook(webhook):
                     except Exception as exception:
                         Log.error(exception)
                         asupporter.set_thanks(False)
-                    Log.info("New donation {}".format(user.name))
+                    Log.info("New donation {}".format(asupporter.NAME))
                     asupporter.save()
                 return make_response(jsonify({'status': 'Updated'}), 200)
     return make_response(jsonify({'status': 'error', 'msg': 'Not found'}), 404)
@@ -157,12 +156,14 @@ def bmc_update(webhook):
 
 @app.errorhandler(404)
 def not_found(error):
-    return make_response(jsonify({'status': 'error', 'msg': 'Not found'}), 404)
+    msg = str(error)
+    return make_response(jsonify({'status': 'error', 'msg': msg}), 404)
 
 
 def init():
     Member.inicializate()
     Supporter.inicializate()
+
 
 if __name__ == '__main__':
     init()

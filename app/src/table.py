@@ -21,9 +21,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import os
 import sqlite3
-from utils import Log, TRUE, FALSE
+from utils import Log
 
 
 class NoUnikeys(Exception):
@@ -137,7 +136,8 @@ class Table:
         if self.get(self.PK):
             keys.remove(self.PK)
             set_values = ",".join([f"{key}=?" for key in keys])
-            sqlquery = f"UPDATE {self.TABLE} SET {set_values} WHERE {self.PK}=?"
+            sqlquery = f"UPDATE {self.TABLE} SET {set_values} "\
+                       f"WHERE {self.PK}=?"
             data = [self.get(key) for key in keys]
             data.append(self.get(self.PK))
             self.__execute(sqlquery, data)
