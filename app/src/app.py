@@ -31,6 +31,7 @@ from supporter import Supporter
 from utils import Log, TRUE
 from bmc import BMC
 from mrapi import MailRelay
+from tgapi import Telegram
 from letterwriter import LetterWriter
 
 
@@ -41,6 +42,8 @@ if os.environ['ENVIRONMENT'] == 'TEST':
 else:
     Table.DATABASE = '/app/database/bmc.db'
 Log.set(os.environ['DEBUG'])
+tg = Telegram(os.environ['TELEGRAM_API_TOKEN'])
+TELEGRAM_CHAT_ID = os.environ['TELEGRAM_CHAT_ID']
 
 
 @app.route('/status', methods=['GET'])
@@ -92,7 +95,10 @@ def bmc_webhook(webhook):
                     except Exception as exception:
                         Log.error(exception)
                         asupporter.set_thanks(False)
-                    Log.info("New donation {}".format(asupporter.NAME))
+                        tg.send_message(TELEGRAM_CHAT_ID, str(exception))
+                    Log.info("New donation {asupporter.NAME}")
+                    tg.send_message(TELEGRAM_CHAT_ID,
+                                    "New donation {asupporter.NAME}")
                     asupporter.save()
                 return make_response(jsonify({'status': 'Updated'}), 200)
     return make_response(jsonify({'status': 'error', 'msg': 'Not found'}), 404)
@@ -149,7 +155,9 @@ def bmc_update(webhook):
             except Exception as exception:
                 amember.set_welcomed(False)
                 Log.error(exception)
-            Log.info("New member {}".format(amember.NAME))
+                tg.send_message(TELEGRAM_CHAT_ID, str(exception))
+            Log.info("New member {amember.NAME}")
+            tg.send_message(TELEGRAM_CHAT_ID, "New member {amember.NAME}")
             amember.save()
         return make_response(jsonify({'status': 'OK', 'msg': 'Updated'}), 200)
 

@@ -32,7 +32,7 @@ class Telegram:
     def __init__(self, token):
         self._token = token
 
-    def sen_message(self, chat_id, message, parse_mode="HTML"):
+    def send_message(self, chat_id, message, parse_mode="HTML"):
         url = self.URL.format(self._token) + '/sendMessage'
         data = {'chat_id': chat_id,
                 'text': message,

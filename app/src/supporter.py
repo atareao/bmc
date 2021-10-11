@@ -50,7 +50,7 @@ class Supporter(Table):
 
     def start(self):
         self.LAST_DONATION = int(time.time())
-        self.TIMES += 1
+        self.TIMES = self.TIMES + 1 if self.TIMES else 0
 
     def set_thanks(self, yes):
         self.THANKS = TRUE if yes else FALSE
