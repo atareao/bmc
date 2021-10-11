@@ -96,9 +96,9 @@ def bmc_webhook(webhook):
                         Log.error(exception)
                         asupporter.set_thanks(False)
                         tg.send_message(TELEGRAM_CHAT_ID, str(exception))
-                    Log.info("New donation {asupporter.NAME}")
+                    Log.info(f"New donation {asupporter.NAME}")
                     tg.send_message(TELEGRAM_CHAT_ID,
-                                    "New donation {asupporter.NAME}")
+                                    f"New donation {asupporter.NAME}")
                     asupporter.save()
                 return make_response(jsonify({'status': 'Updated'}), 200)
     return make_response(jsonify({'status': 'error', 'msg': 'Not found'}), 404)
@@ -156,8 +156,8 @@ def bmc_update(webhook):
                 amember.set_welcomed(False)
                 Log.error(exception)
                 tg.send_message(TELEGRAM_CHAT_ID, str(exception))
-            Log.info("New member {amember.NAME}")
-            tg.send_message(TELEGRAM_CHAT_ID, "New member {amember.NAME}")
+            Log.info(f"New member {amember.NAME}")
+            tg.send_message(TELEGRAM_CHAT_ID, f"New member {amember.NAME}")
             amember.save()
         return make_response(jsonify({'status': 'OK', 'msg': 'Updated'}), 200)
 
