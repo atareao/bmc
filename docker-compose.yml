@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     networks:
       - internal
-    volumes: 
+    volumes:
       - ./crontab:/crontab
     env_file:
       - bmc_prod.env
@@ -25,10 +25,10 @@ services:
     env_file:
       - bmc_prod.env
     ports:
-      - 5001:5000
+      - 8001:8000
     labels:
       - traefik.enable=true
-      - traefik.http.services.bmc.loadbalancer.server.port=5000
+      - traefik.http.services.bmc.loadbalancer.server.port=8000
       - traefik.http.routers.bmc.entrypoints=http
       - traefik.http.routers.bmc.rule=Host(`bmc.territoriolinux.es`)
       - traefik.http.middlewares.bmc-https-redirect.redirectscheme.scheme=https
