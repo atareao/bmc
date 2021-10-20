@@ -44,9 +44,7 @@ class LetterWriter:
                     content = re.sub(PATTERN.format(key), value, content)
                 print(content)
 
+
 if __name__ == '__main__':
     lw = LetterWriter('donacion.md', {"name": "Lorenzo"})
     lw.format()
-
-
-
