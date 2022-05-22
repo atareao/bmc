@@ -141,3 +141,4 @@ ENV.sh
 bmc_prod.env
 templates/
 database/
+bmc_prod.env
