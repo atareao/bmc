@@ -24,6 +24,8 @@ services:
       - ./templates:/app/templates
     env_file:
       - bmc_prod.env
+    ports:
+      - 8001:8000
     labels:
       - traefik.enable=true
       - traefik.http.services.bmc.loadbalancer.server.port=8000

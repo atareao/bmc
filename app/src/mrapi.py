@@ -56,7 +56,7 @@ class MailRelay:
         return md.convert(markdown_content)
 
     def send_mail(self, from_name, from_mail, to_name, to_mail, subject,
-            markdown_content):
+                  markdown_content):
         payload = {
                 "from": {"email": from_mail, "name": from_name},
                 "to": [{"email": to_mail, "name": to_name}],
@@ -77,17 +77,3 @@ class MailRelay:
         except Exception as exception:
             print(exception)
         return False
-
-if __name__ == '__main__':
-    base_url = 'https://atareao.ipzmarketing.com/api/v1'
-    token = 'A8Z7eCl5iC7YTgBKPJyujKvkCncyklzlkOjERKA0'
-    from_name = "lorenzo"
-    from_mail = "atareao@atareao.es"
-    to_name = "carbonelo"
-    to_mail = "lorenzo.carbonell.cerezo@gmail.com"
-    subject = "Correo de test with API"
-    markdown_content = "Este es un *correo* de prueba, mister **Carbonelo**"
-    mailrelay = MailRelay(base_url, token)
-    mailrelay.send_mail(from_name, from_mail, to_name, to_mail, subject,
-            markdown_content)
-

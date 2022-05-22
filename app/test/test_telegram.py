@@ -21,29 +21,22 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import re
+import unittest
+import sys
 import os
+sys.path.append(os.path.join("../src"))
+from tgapi import Telegram
+from utils import Log, load_env
 
 
-PATTERN = r'\|\|\s*{}\s*\|\|'
+class TestMailer(unittest.TestCase):
+    def test_send_message(self):
+        tg = Telegram(os.environ['TELEGRAM_API_TOKEN'])
+        chat_id = os.environ['TELEGRAM_CHAT_ID']
+        tg.send_message(chat_id, "Hola")
+        self.assertTrue(True)
 
-
-class LetterWriter:
-    def __init__(self, filename, tokens):
-        self._filename = filename
-        self._tokens = tokens
-
-    def format(self):
-        if os.path.exists(self._filename):
-            with open(self._filename, 'r') as fr:
-                content = fr.read()
-                for key in self._tokens:
-                    value = self._tokens[key]
-                    print(key, value)
-                    print(PATTERN.format(key))
-                    content = re.sub(PATTERN.format(key), value, content)
-                print(content)
 
 if __name__ == '__main__':
-    lw = LetterWriter('donacion.md', {"name": "Lorenzo"})
-    lw.format()
+    load_env("../../bmc_prod.env")
+    unittest.main()

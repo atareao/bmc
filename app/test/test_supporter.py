@@ -57,6 +57,17 @@ class TestSupporter(unittest.TestCase):
         bsupporter.save()
         self.assertNotEqual(asupporter, bsupporter)
 
+    def test_donation(self):
+        Log.info("=== donation ===")
+        asupporter = Supporter("Lorenzo", "lorenzo.carbonell.cerezo@gmail.com")
+        asupporter.save()
+        asupporter.start()
+        asupporter.start()
+        asupporter.start()
+        asupporter.save()
+        rsupporter = Supporter.get_by_id(asupporter.ID)
+        self.assertEqual(rsupporter.TIMES, 3)
+
     def test_welcome(self):
         Log.info("=== test_create ===")
         asupporter = Supporter("Lorenzo", "lorenzo.carbonell.cerezo@gmail.com")
@@ -66,7 +77,6 @@ class TestSupporter(unittest.TestCase):
         asupporter.save()
         nsupporter = Supporter.get_by_id(asupporter.ID)
         self.assertEqual(nsupporter.THANKS, TRUE)
-
 
 
 if __name__ == '__main__':

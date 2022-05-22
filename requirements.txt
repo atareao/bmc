@@ -1,4 +1,8 @@
 flask
+<<<<<<< HEAD
+=======
+gunicorn
+>>>>>>> 6796d65aea8ac2beaa5c83ef0d3c0d62b9d4e1c9
 itsdangerous
 requests
 pyinotify
