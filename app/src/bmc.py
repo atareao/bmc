@@ -53,6 +53,10 @@ class BMC:
                     amember = Member(item['payer_name'], item['payer_email'])
                     members.append(amember)
                 return url, members
+            else:
+                msg = f"Error. HTTP code: {response.status_code}"
+                print(response.json())
+                raise Exception(msg)
         except Exception as exception:
             Log.error(exception)
         return None, members
