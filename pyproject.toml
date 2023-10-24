@@ -1,0 +1,67 @@
+[tool.poetry]
+name = "bmc"
+version = "0.1.0"
+description = ""
+authors = ["Lorenzo Carbonell <lorenzo.carbonell.cerezo@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.group.dev.dependencies]
+debugpy = "^1.8.0"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+flask = "^3.0.0"
+gunicorn = "^21.2.0"
+requests = "^2.31.0"
+markdown = "^3.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+exclude = '''
+/(
+    \.git
+  | \.mypy_cache
+  | \.pytest_cache
+  | \.tox
+  | \.venv
+  | __pycache__
+  | build
+  | dist
+)/
+'''
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+exclude = [
+  ".bzr",
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".hg",
+  ".mypy_cache",
+  ".nox",
+  ".pants.d",
+  ".ruff_cache",
+  ".svn",
+  ".tox",
+  ".venv",
+  "__pypackages__",
+  "_build",
+  "buck-out",
+  "build",
+  "dist",
+  "node_modules",
+  "venv",
+  ".venv",
+]
+
+[tool.ruff.flake8-quotes]
+docstring-quotes = "double"
