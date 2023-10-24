@@ -1,37 +1,71 @@
-FROM alpine:3.10
+###############################################################################
+## Builder
+###############################################################################
+FROM alpine:3.18 as builder
 
-ENV TZ=Europe/Madrid
-MAINTAINER Lorenzo Carbonell <a.k.a. atareao> "lorenzo.carbonell.cerezo@gmail.com"
-
-ENV PYTHONUNBUFFERED=1
-
-COPY requirements.txt /requirements.txt
+ENV POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    POETRY_VIRTUALENVS_CREATE=1 \
+    POETRY_CACHE_DIR=/tmp/poetry_cache
 
 RUN echo "**** install Python ****" && \
-    apk add --update --no-cache python3 tini tzdata && \
-    if [ ! -e /usr/bin/python ]; then ln -sf python3 /usr/bin/python ; fi && \
-    \
-    echo "**** install pip ****" && \
-    python3 -m ensurepip && \
-    rm -r /usr/lib/python*/ensurepip && \
-    pip3 install --no-cache --upgrade pip setuptools wheel && \
-    if [ ! -e /usr/bin/pip ]; then ln -s pip3 /usr/bin/pip ; fi && \
-    echo "**** install dependencies **** " && \
-    pip3 install --no-cache-dir -r /requirements.txt && \
-    rm -rf /var/lib/apt/lists/* /requirements.txt && \
-    echo "**** create user ****" && \
-    addgroup dockeruser && \
-    adduser -h /app -G dockeruser -D dockeruser && \
-    mkdir -p /app/database && \
-    chown -R dockeruser:dockeruser /app
+    apk add --update --no-cache --virtual \
+            .build-deps \
+            gcc~=12.2 \
+            musl-dev~=1.2 \
+            python3-dev~=3.11 \
+            python3~=3.11 \
+            py3-pip~=23.1 && \
+    rm -rf /var/lib/apt/lists/* && \
+    echo "**** install Poetry ****" && \
+    pip install --no-cache-dir poetry==1.6.1
 
-VOLUME /app/templates
-VOLUME /app/database
+
 WORKDIR /app
-USER dockeruser
 
-COPY start.sh /start.sh
-COPY ./app /app
+COPY pyproject.toml poetry.lock ./
 
-ENTRYPOINT ["tini", "--"]
-CMD ["/bin/sh", "/start.sh"]
+RUN echo "**** install Python dependencies ****" && \
+    poetry install --without dev --no-root && rm -rf $POETRY_CACHE_DIR
+
+###############################################################################
+## Final image
+###############################################################################
+FROM alpine:3.18
+
+LABEL maintainer="Lorenzo Carbonell <a.k.a. atareao> lorenzo.carbonell.cerezo@gmail.com"
+
+ENV VIRTUAL_ENV=/app/.venv \
+    PATH="/app/.venv/bin:$PATH" \
+    PYTHONIOENCODING=utf-8 \
+    PYTHONUNBUFFERED=1 \
+    USER=app \
+    UID=10001
+
+RUN echo "**** install Python ****" && \
+    apk add --update --no-cache \
+            ffmpeg~=6.0 \
+            curl~=8.3 \
+            python3~=3.11 && \
+    rm -rf /var/lib/apt/lists/* && \
+    mkdir -p /app/tmp && \
+    mkdir -p /app/conf
+
+COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+COPY run.sh ./src /app/
+
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "/${USER}" \
+    --shell "/sbin/nologin" \
+    --uid "${UID}" \
+    "${USER}" && \
+    chown -R app:app /app
+
+
+WORKDIR /app
+USER app
+
+CMD ["/bin/sh", "/app/run.sh"]
+
